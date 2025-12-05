@@ -1,260 +1,730 @@
-# Franka Emika Panda Robot - ROS 2 Humble
+# 🤖 Franka Emika Panda 机器人 ROS 2 演示系统
 
-完整的 Franka Emika Panda 机器人 ROS 2 工作区，支持可视化和仿真。
+> **专业级机器人可视化与控制演示** | ROS 2 Humble | 完全开源
 
-## 📋 要求
+## 📖 目录
+- [1. 系统概述](#1-系统概述)
+- [2. 快速演示（3步启动）](#2-快速演示3步启动)
+- [3. 机器人控制方法](#3-机器人控制方法)
+- [4. 系统架构](#4-系统架构)
+- [5. 技术规格](#5-技术规格)
+- [6. 常见问题](#6-常见问题)
 
-- **操作系统**: Ubuntu 22.04 LTS
-- **ROS 2**: Humble 版本
-- **Python**: 3.10+
-- **构建工具**: colcon
+---
 
-## 📦 安装依赖
+## 1. 系统概述
+
+### 项目简介
+
+本项目提供了一个**完整的 Franka Emika Panda 7-DOF 协作机器人在 ROS 2 Humble 中的可视化与控制系统**，开箱即用，无需复杂配置。
+
+### 核心特性
+
+| 特性 | 说明 |
+|------|------|
+| 🎯 **即插即用** | 一键启动，自动加载机器人模型 |
+| 🎮 **多种控制** | GUI滑块、Python脚本、Jupyter交互式 |
+| 📊 **实时可视化** | RViz2 实时显示机器人状态和坐标系 |
+| 🔧 **完整模型** | 12个Link，8个关节，高精度网格 |
+| 📚 **详细文档** | 从零开始的完整教程 |
+| 🚀 **易于扩展** | 清晰的代码结构，方便集成新功能 |
+
+### 项目组成
+
+```
+🤖 Panda Robot Demo
+├── 📦 ROS 2 包（panda_description）
+├── 🎨 完整 URDF 模型
+├── 🖼️ 20个高质量3D网格
+├── 🚀 3种控制方法
+├── 📚 完整文档
+└── 🎬 即可使用的示例
+```
+
+---
+
+## 2. 快速演示（3步启动）
+
+### 前置要求
 
 ```bash
-sudo apt update
-sudo apt install -y \
-    ros-humble-desktop \
-    python3-colcon-common-extensions \
-    python3-rosdep
+# 检查 ROS 2 Humble 安装
+ros2 --version
+# 输出应为: ROS 2 Humble ...
+
+# 检查必要工具
+which python3
+which rviz2
 ```
 
-## 🏗️ 项目结构
+### 演示步骤
 
-```
-ros2_ws/
-├── src/
-│   └── panda_description/
-│       ├── CMakeLists.txt
-│       ├── package.xml
-│       ├── launch/
-│       │   └── view_panda.launch.py       # ROS 2 launch 文件
-│       ├── urdf/
-│       │   └── panda.urdf                 # URDF 机器人模型
-│       └── meshes/
-│           ├── collision/                 # 碰撞网格（OBJ 格式）
-│           └── visual/                    # 可视化网格（DAE 格式）
-├── install/                               # 安装目录
-├── build/                                 # 构建目录
-├── log/                                   # 日志目录
-└── run_panda.sh                           # 快速启动脚本
-```
-
-## 🔨 构建
+#### **步骤 1️⃣：进入工作区**
 
 ```bash
-# 进入工作区
-cd ros2_ws
-
-# 构建所有包
-colcon build
-
-# 或只构建 panda_description 包
-colcon build --packages-select panda_description
+cd /media/dubhe/store/sim/panda/PandaRobot/ros2_ws
 ```
 
-## 🚀 运行
-
-### 方法 1：使用启动脚本（推荐）
+#### **步骤 2️⃣：加载 ROS 2 环境**
 
 ```bash
-cd ros2_ws
+source install/setup.bash
+```
+
+#### **步骤 3️⃣：启动演示**
+
+**选项 A - 基础演示（仅可视化）**
+```bash
 ./run_panda.sh
 ```
+✨ **结果**：RViz2 打开，自动显示 Panda 机器人 3D 模型
 
-### 方法 2：手动启动
-
+**选项 B - GUI 控制演示（推荐）**
 ```bash
-cd ros2_ws
-source install/setup.bash
-ros2 launch panda_description view_panda.launch.py
+ros2 launch panda_description view_panda_gui.launch.py
+```
+✨ **结果**：
+- RViz2 显示机器人
+- GUI 窗口出现 10 个关节的滑块
+- 拖动滑块即可控制机器人关节
+
+### 演示效果
+
+```
+┌──────────────────────────────────┐
+│         RViz2 窗口               │
+│  ┌─────────────────────────────┐ │
+│  │    Panda 机器人 3D 模型     │ │
+│  │  - 实时显示关节位置         │ │
+│  │  - 坐标系可视化             │ │
+│  │  - 网格高精度渲染           │ │
+│  └─────────────────────────────┘ │
+└──────────────────────────────────┘
+
+┌──────────────────────────────────┐
+│  joint_state_publisher_gui       │
+│  ┌─────────────────────────────┐ │
+│  │ panda_joint1  [====●====]  │ │
+│  │ panda_joint2  [===●=====]  │ │
+│  │ panda_joint3  [====●====]  │ │
+│  │ ...（共10个关节）          │ │
+│  └─────────────────────────────┘ │
+└──────────────────────────────────┘
 ```
 
-### 方法 3：单独启动各个节点
+---
 
+## 3. 机器人控制方法
+
+### 方法 1️⃣：GUI 滑块控制（最简单）⭐
+
+**最适合**：演示、快速测试、不需要编程
+
+**启动方式**
 ```bash
-# 终端 1：启动 robot_state_publisher
-source /opt/ros/humble/setup.bash
-source install/setup.bash
-ros2 run robot_state_publisher robot_state_publisher --ros-args -p robot_description="$(cat src/panda_description/urdf/panda.urdf)"
-
-# 终端 2：启动 joint_state_publisher
-source install/setup.bash
-ros2 run joint_state_publisher joint_state_publisher
-
-# 终端 3：启动 RViz2
-source install/setup.bash
-ros2 run rviz2 rviz2
-```
-
-## 📊 可视化
-
-启动后，RViz2 会自动打开显示机器人模型。你可以：
-
-- **查看机器人**：机器人会在 RViz2 窗口中显示
-- **发布关节状态**：joint_state_publisher 会发布随机关节值
-- **监控 TF 树**：robot_state_publisher 发布所有变换
-
-### 在 RViz2 中添加 RobotModel 显示（如果未自动加载）
-
-1. 点击左下角的 `Add`
-2. 选择 `RobotModel`
-3. 在参数中设置 `Topic` 为 `/tf` 或 `Fixed Frame` 为 `panda_link0`
-
-## 🎮 控制机器人
-
-有三种主要的方式来控制 Panda 机器人的关节：
-
-### 1. **GUI 方式（推荐）** 🎨
-
-使用图形界面滑块控制所有关节：
-
-```bash
+cd /media/dubhe/store/sim/panda/PandaRobot/ros2_ws
 source install/setup.bash
 ros2 launch panda_description view_panda_gui.launch.py
 ```
 
-### 2. **Python 脚本方式** 🐍
+**使用方法**
+1. RViz2 自动打开，显示机器人
+2. 同时弹出 `joint_state_publisher_gui` 窗口
+3. 拖动窗口中的 10 个滑块控制关节
+4. 机器人实时响应，RViz2 中的模型也实时更新
 
-运行命令行脚本来设置预定义的位置：
+**优点**
+- ✅ 无需编程
+- ✅ 直观易用
+- ✅ 实时反馈
+- ✅ 支持所有 10 个关节
+
+**缺点**
+- ❌ 无法保存/重复动作
+- ❌ 无法编程自动化
+
+---
+
+### 方法 2️⃣：Python 脚本控制（推荐）⭐⭐
+
+**最适合**：自动化、编程、教学
+
+**快速开始**
 
 ```bash
+# 启动机器人系统（后台）
+cd /media/dubhe/store/sim/panda/PandaRobot/ros2_ws
 source install/setup.bash
-python3 src/panda_description/scripts/panda_joint_controller.py home    # 初始位置
-python3 src/panda_description/scripts/panda_joint_controller.py ready   # 准备位置
-python3 src/panda_description/scripts/panda_joint_controller.py stretch # 伸展位置
-python3 src/panda_description/scripts/panda_joint_controller.py open    # 打开夹爪
-python3 src/panda_description/scripts/panda_joint_controller.py close   # 关闭夹爪
+ros2 launch panda_description view_panda.launch.py &
+
+# 在另一个终端运行控制脚本
+source install/setup.bash
+python3 src/panda_description/scripts/panda_joint_controller.py home
 ```
 
-### 3. **Jupyter Notebook 方式** 📓
-
-交互式 notebook 与实时滑块控制：
+**预设位置**
 
 ```bash
+# Home 位置（初始位置）
+python3 panda_joint_controller.py home
+
+# Ready 位置（准备就绪）
+python3 panda_joint_controller.py ready
+
+# Stretch 位置（伸展）
+python3 panda_joint_controller.py stretch
+
+# Open（打开夹爪）
+python3 panda_joint_controller.py open
+
+# Close（关闭夹爪）
+python3 panda_joint_controller.py close
+```
+
+**自定义控制**
+
+编辑 `src/panda_description/scripts/panda_joint_controller.py`：
+
+```python
+def move_to_position(position_dict):
+    """
+    position_dict: 关节名称 -> 角度(弧度)
+    示例:
+    {
+        'panda_joint1': 0.0,
+        'panda_joint2': -0.785,
+        'panda_joint3': 0.0,
+        ...
+    }
+    """
+    msg = JointState()
+    msg.header.stamp = self.get_clock().now().to_msg()
+    msg.name = list(position_dict.keys())
+    msg.position = list(position_dict.values())
+    self.publisher.publish(msg)
+```
+
+**优点**
+- ✅ 可编程自动化
+- ✅ 易于集成到大型系统
+- ✅ 支持动作序列
+- ✅ 可重复使用
+
+---
+
+### 方法 3️⃣：Jupyter Notebook 交互式控制⭐⭐⭐
+
+**最适合**：教学、研究、交互式开发
+
+**启动方式**
+
+```bash
+# 方式1：使用脚本启动（推荐）
+cd /media/dubhe/store/sim/panda/PandaRobot/ros2_ws
+bash src/panda_description/notebooks/start_notebook.sh
+
+# 方式2：手动启动
 source install/setup.bash
 jupyter notebook src/panda_description/notebooks/panda_control_interactive.ipynb
 ```
 
-**详见 [完整控制指南](CONTROL_GUIDE.md)** 📖
+**功能特性**
 
-### 发布关节状态（高级）
+```python
+# 创建机器人控制器
+controller = PandaController()
 
-```bash
-source install/setup.bash
-ros2 topic pub -1 /joint_states sensor_msgs/msg/JointState \
-    "{header: {stamp: {sec: 0, nanosec: 0}, frame_id: ''}, \
-    name: ['panda_joint1', 'panda_joint2'], \
-    position: [0.5, -0.5], \
-    velocity: [], \
-    effort: []}"
+# 实时滑块控制（在 Notebook 中）
+interact(controller.set_joint_position, 
+         joint1=(-3.14, 3.14, 0.01),
+         joint2=(-2.0, 2.0, 0.01),
+         ...)
+
+# 显示当前关节状态
+controller.print_status()
+
+# 执行预设动作
+controller.move_to('home')
+controller.move_to('ready')
+
+# 自定义动作
+controller.move([0, -0.785, 0, -2.356, 0, 1.571, 0.785])
 ```
 
-### 查看可用的话题
+**在 Notebook 中的效果**
 
-```bash
-ros2 topic list
+```
+[ ] 代码单元格
+[ ] 实时滑块 ├─ panda_joint1: [====●====]
+             ├─ panda_joint2: [===●=====]
+             ├─ panda_joint3: [====●====]
+             └─ ... (10个滑块)
+[ ] 关节状态显示
+[ ] 执行动作按钮
 ```
 
-### 查看 TF 树
-
-```bash
-ros2 run tf2_tools view_frames
-```
-
-## 📝 配置
-
-### 修改 URDF 模型
-
-URDF 文件位于 `src/panda_description/urdf/panda.urdf`。修改后重新构建：
-
-```bash
-colcon build --packages-select panda_description
-source install/setup.bash
-```
-
-### 修改网格文件
-
-网格文件位于 `src/panda_description/meshes/`：
-- `collision/` - 碰撞检测用的低多边形网格（OBJ 格式）
-- `visual/` - 可视化显示用的高质量网格（DAE 格式）
-
-## 🐛 故障排除
-
-### RViz2 不显示机器人
-
-1. 检查 `/robot_description` 话题是否有数据：
-   ```bash
-   ros2 topic echo /robot_description | head -20
-   ```
-
-2. 检查 `/joint_states` 话题是否有数据：
-   ```bash
-   ros2 topic echo /joint_states
-   ```
-
-3. 检查 TF 广播：
-   ```bash
-   ros2 topic echo /tf
-   ```
-
-### 找不到网格文件
-
-确保网格文件存在：
-```bash
-ls -la src/panda_description/meshes/visual/
-```
-
-如果缺少文件，重新复制：
-```bash
-cp -r ../deps/Panda/meshes/* src/panda_description/meshes/
-```
-
-## 📚 相关资源
-
-- [ROS 2 官方文档](https://docs.ros.org/en/humble/)
-- [URDF 教程](http://wiki.ros.org/urdf/Tutorials)
-- [RViz2 使用指南](https://github.com/ros2/rviz/wiki/User-Guide)
-
-## 📄 许可证
-
-Apache License 2.0 - 详见 LICENSE.md
-
-## 👨‍💻 开发指南
-
-### 添加新的 ROS 2 节点
-
-1. 在 `src/` 中创建新包：
-   ```bash
-   cd src
-   ros2 pkg create --build-type ament_cmake my_package
-   ```
-
-2. 在 `launch/` 文件中添加节点
-
-3. 重新构建：
-   ```bash
-   cd ..
-   colcon build
-   ```
-
-### 调试技巧
-
-```bash
-# 详细输出
-colcon build --packages-select panda_description --cmake-args -DCMAKE_BUILD_TYPE=Debug
-
-# 查看日志
-colcon build --packages-select panda_description --event-handlers console_direct+
-
-# 清除构建
-colcon clean packages --select panda_description
-```
-
-## 🤝 贡献
-
-欢迎提交问题和拉取请求！
+**优点**
+- ✅ 交互式开发
+- ✅ 实时反馈
+- ✅ 适合教学
+- ✅ 易于调试
 
 ---
 
-**最后更新**: 2025-12-04
+## 4. 系统架构
+
+### 软件架构
+
+```
+┌─────────────────────────────────────────────────┐
+│           ROS 2 Humble 环境                     │
+├─────────────────────────────────────────────────┤
+│                                                 │
+│  ┌──────────────┐  ┌──────────────┐             │
+│  │ RViz2        │  │ joint_state  │             │
+│  │ (可视化)     │  │ _publisher   │             │
+│  └──────────────┘  │ _gui         │             │
+│         ▲          │ (控制GUI)    │             │
+│         │          └──────────────┘             │
+│         │                 │                     │
+│         └─────────────────┘                     │
+│         Topic: /joint_states                    │
+│              /tf                                │
+│                 ▲                               │
+│                 │                               │
+│         ┌───────▼────────┐                      │
+│         │robot_state_     │                     │
+│         │publisher        │                     │
+│         │(TF 发布)       │                      │
+│         └───────▲────────┘                      │
+│                 │                               │
+│         Topic: /robot_description              │
+│                 │                               │
+│         ┌───────▼────────────────┐              │
+│         │   URDF 模型            │              │
+│         │ (panda.urdf)           │              │
+│         │ 12 links, 8 joints     │              │
+│         │ 20 meshes (.dae)       │              │
+│         └────────────────────────┘              │
+│                                                 │
+└─────────────────────────────────────────────────┘
+```
+
+### 文件结构
+
+```
+ros2_ws/
+├── 📄 DEMO.md                          ← 你正在看这个文件！
+├── 📄 run_panda.sh                     ← 一键启动脚本
+│
+├── src/panda_description/
+│   ├── package.xml                     ← 包配置
+│   ├── CMakeLists.txt                  ← 构建配置
+│   │
+│   ├── urdf/
+│   │   └── panda.urdf                  ← 机器人模型定义
+│   │
+│   ├── meshes/
+│   │   ├── visual/                     ← 可视化网格 (DAE格式，10个)
+│   │   │   ├── panda_hand.dae
+│   │   │   ├── panda_link0.dae
+│   │   │   ├── ... (8 more)
+│   │   │   └── panda_rightfinger.dae
+│   │   └── collision/                  ← 碰撞网格 (OBJ格式，10个)
+│   │       ├── panda_hand.obj
+│   │       └── ...
+│   │
+│   ├── launch/
+│   │   ├── view_panda.launch.py        ← 基础启动（仅可视化）
+│   │   ├── view_panda_gui.launch.py    ← GUI启动（推荐演示）
+│   │   └── panda.rviz                  ← RViz2 配置文件
+│   │
+│   ├── scripts/
+│   │   └── panda_joint_controller.py   ← Python 控制脚本
+│   │
+│   └── notebooks/
+│       ├── panda_control_interactive.ipynb  ← Jupyter 交互式
+│       └── start_notebook.sh                ← Notebook 启动脚本
+│
+└── install/                             ← 已安装文件
+```
+
+### 关键概念
+
+#### **URDF (Unified Robot Description Format)**
+机器人的完整描述，包含：
+- **Links**：刚体部件（12个）
+  - panda_link0~7（7个旋转关节）
+  - panda_hand、panda_leftfinger、panda_rightfinger
+- **Joints**：关节连接（8个）
+  - panda_joint1~7：旋转关节（-3.14~3.14 rad）
+  - panda_hand_joint：固定关节（末端执行器）
+
+#### **Topic（话题）**
+ROS 2 中的通信机制：
+
+| 话题 | 类型 | 发布者 | 说明 |
+|------|------|--------|------|
+| `/joint_states` | JointState | joint_state_publisher_gui | 关节状态（位置、速度） |
+| `/tf` | TransformStamped | robot_state_publisher | 坐标变换树 |
+| `/robot_description` | String | launch | URDF 模型文本 |
+
+---
+
+## 5. 技术规格
+
+### 机器人规格
+
+| 参数 | 值 |
+|------|-----|
+| **类型** | 7-DOF 协作机器人 |
+| **制造商** | Franka Emika |
+| **关节数** | 7 个旋转关节 |
+| **末端执行器** | 2 指平行夹爪 |
+| **总Link数** | 12 个 |
+| **工作空间** | 球形，半径 ~0.85m |
+| **负载** | 3 kg（额定） |
+
+### 关节规格
+
+```
+panda_joint1:  旋转范围 [-π, π]     (±180°)
+panda_joint2:  旋转范围 [-π, π]     (±180°)
+panda_joint3:  旋转范围 [-π, π]     (±180°)
+panda_joint4:  旋转范围 [-π, π]     (±180°)
+panda_joint5:  旋转范围 [-π, π]     (±180°)
+panda_joint6:  旋转范围 [-π, π]     (±180°)
+panda_joint7:  旋转范围 [-π, π]     (±180°)
+panda_hand:    平行夹爪（固定）
+```
+
+### 系统要求
+
+| 组件 | 要求 | 备注 |
+|------|------|------|
+| **OS** | Ubuntu 22.04 LTS | 其他 Ubuntu 版本也可以 |
+| **ROS 2** | Humble | 可能支持 Iron, Rolling |
+| **Python** | 3.10+ | 用于脚本和 Notebook |
+| **GPU** | 可选 | RViz2 建议支持 OpenGL 4.6+ |
+| **内存** | 4 GB+ | 推荐 8 GB |
+| **磁盘空间** | 500 MB+ | 包含网格文件 |
+
+### 依赖包
+
+```bash
+# 自动依赖（已配置）
+- ros2-humble-robot-state-publisher
+- ros2-humble-joint-state-publisher-gui
+- ros2-humble-rviz2
+- ros2-humble-ament-cmake
+
+# 可选（用于 Notebook）
+- jupyter
+- matplotlib
+- ipywidgets
+```
+
+---
+
+## 6. 常见问题
+
+### ❓ Q1: 启动后 RViz2 不显示机器人
+
+**原因**：RViz2 还未加载配置
+
+**解决方案**：
+```bash
+# 方案 A：使用 GUI 启动（自动加载）
+ros2 launch panda_description view_panda_gui.launch.py
+
+# 方案 B：手动配置
+# 在 RViz2 中：
+# 1. Add → RobotModel
+# 2. Fixed Frame 改为 "panda_link0"
+```
+
+---
+
+### ❓ Q2: 关节滑块无法拖动
+
+**原因**：可能是 GUI 焦点问题或权限问题
+
+**解决方案**：
+```bash
+# 重启 GUI
+pkill -f joint_state_publisher_gui
+ros2 launch panda_description view_panda_gui.launch.py
+
+# 或重新启动整个系统
+pkill -f "rviz2|robot_state|joint_state"
+./run_panda.sh
+```
+
+---
+
+### ❓ Q3: Python 脚本提示找不到包
+
+**原因**：未加载 ROS 2 环境
+
+**解决方案**：
+```bash
+# 必须在同一终端中执行
+source install/setup.bash
+python3 src/panda_description/scripts/panda_joint_controller.py home
+```
+
+---
+
+### ❓ Q4: Jupyter Notebook 无法启动
+
+**原因**：Jupyter 未安装或环境问题
+
+**解决方案**：
+```bash
+# 安装 Jupyter
+pip3 install jupyter ipywidgets
+
+# 启动 Notebook
+cd ros2_ws
+source install/setup.bash
+jupyter notebook src/panda_description/notebooks/panda_control_interactive.ipynb
+```
+
+---
+
+### ❓ Q5: 如何自定义机器人位置？
+
+**方法1：编辑 URDF**
+```xml
+<!-- 修改 src/panda_description/urdf/panda.urdf -->
+<origin xyz="0 0 0.4" rpy="0 0 0"/>
+```
+
+**方法2：使用 Python 脚本**
+```python
+# 自定义关节角度
+positions = {
+    'panda_joint1': 0.5,
+    'panda_joint2': -1.0,
+    'panda_joint3': 0.2,
+    # ... 其他关节
+}
+controller.move_to_position(positions)
+```
+
+---
+
+### ❓ Q6: 如何录制/回放机器人动作？
+
+**使用 ROS 2 Bag（录制）**
+```bash
+# 录制关节状态
+ros2 bag record /joint_states -o panda_demo
+
+# 回放
+ros2 bag play panda_demo
+```
+
+**使用 Python 脚本（保存动作序列）**
+```python
+import json
+
+# 保存当前姿态
+gestures = {
+    'home': [0.0, -0.785, 0.0, -2.356, 0.0, 1.571, 0.785],
+    'ready': [0.0, -0.454, 0.0, -2.254, 0.0, 1.809, 0.785],
+    'custom': [angles...]
+}
+with open('gestures.json', 'w') as f:
+    json.dump(gestures, f)
+
+# 加载并执行
+with open('gestures.json', 'r') as f:
+    gestures = json.load(f)
+controller.move(gestures['home'])
+```
+
+---
+
+### ❓ Q7: 如何添加新的预设位置？
+
+编辑 `panda_joint_controller.py`：
+
+```python
+PREDEFINED_POSITIONS = {
+    'home': {
+        'panda_joint1': 0.0,
+        'panda_joint2': -0.785,
+        # ...
+    },
+    'my_custom_pose': {  # ← 添加新位置
+        'panda_joint1': 1.5,
+        'panda_joint2': -1.2,
+        # ... 设置所有 7 个关节
+    }
+}
+
+# 然后使用
+python3 panda_joint_controller.py my_custom_pose
+```
+
+---
+
+### ❓ Q8: 能否与真实 Panda 机器人一起使用？
+
+**当前**：这是仿真系统，用于可视化和学习
+
+**未来可以**：
+1. 连接到真实 Panda 机器人的控制器
+2. 使用 `franka_ros2` 官方包
+3. 将控制命令转换为实际关节命令
+
+**参考资源**：
+- [Franka ROS 2](https://github.com/frankaemika/franka_ros2)
+- [Franka 官方文档](https://frankaemika.github.io/)
+
+---
+
+## 📚 进阶使用
+
+### 与 MoveIt 2 集成（路径规划）
+
+```bash
+# 安装 MoveIt 2
+sudo apt install ros-humble-moveit
+
+# 在 launch 文件中添加
+from moveit_configs_utils import MoveItConfigsBuilder
+from moveit_configs_utils.launches import generate_move_group_launch
+
+# 使用 MoveIt 进行轨迹规划
+```
+
+### 添加传感器模拟
+
+```python
+# 模拟力/力矩传感器
+import numpy as np
+
+def simulate_wrench():
+    # 模拟末端执行器受到的力
+    force = np.array([0, 0, -9.81 * 3])  # 重力
+    torque = np.array([0, 0, 0])
+    return force, torque
+```
+
+### 导出为其他格式
+
+```bash
+# 转换 URDF 为 MJCF（MuJoCo）
+python3 -m panda_description.tools.urdf_to_mjcf panda.urdf
+
+# 转换为 SKEL（Dart）
+python3 -m panda_description.tools.urdf_to_skel panda.urdf
+```
+
+---
+
+## 🎓 学习资源
+
+| 资源 | 链接 | 说明 |
+|------|------|------|
+| **ROS 2 官方文档** | https://docs.ros.org/en/humble/ | 完整 ROS 2 教程 |
+| **URDF 教程** | http://wiki.ros.org/urdf/Tutorials | 机器人建模 |
+| **RViz2 指南** | https://github.com/ros2/rviz | 可视化工具 |
+| **Franka 官方** | https://frankaemika.github.io/ | 官方文档 |
+| **MoveIt 2** | https://moveit.ros.org/ | 高级运动规划 |
+
+---
+
+## 📊 演示清单
+
+用于现场演示，请按以下顺序进行：
+
+```
+[ ] 1. 环境检查
+      - 检查 ROS 2 环境
+      - 进入工作区
+      - source setup.bash
+
+[ ] 2. 启动基础演示
+      - ./run_panda.sh
+      - 展示自动加载的机器人模型
+      - 旋转视图、缩放
+
+[ ] 3. 演示 GUI 控制
+      - 启动 GUI 版本
+      - 拖动关节滑块
+      - 演示夹爪打开/关闭
+      - 演示多个预设位置
+
+[ ] 4. 演示 Python 脚本
+      - 运行 home → ready → stretch 序列
+      - 展示自动化控制
+
+[ ] 5. 演示 Jupyter Notebook（可选）
+      - 交互式滑块控制
+      - 实时反馈
+      - 编程示例
+
+[ ] 6. 答疑
+      - 解答观众提问
+      - 讨论应用场景
+```
+
+---
+
+## 🔗 相关项目
+
+本项目还包含：
+
+```
+/media/dubhe/store/sim/panda/
+├── PandaRobot/
+│   ├── ros2_ws/              ← 你的 ROS 2 工作区（本项目）
+│   ├── deps/Panda/           ← 原始模型文件
+│   └── 其他资源...
+└── ...
+```
+
+---
+
+## 📝 许可证 & 致谢
+
+- **Panda 模型**：Franka Emika（官方）
+- **ROS 2 Humble**：开源社区
+- **本项目**：演示和教学用途
+
+---
+
+## ✉️ 支持 & 反馈
+
+遇到问题？
+
+```bash
+# 1. 查看日志
+tail -f ~/.ros/log/latest/*/std*
+
+# 2. 检查所有节点运行状态
+ros2 node list
+
+# 3. 检查话题状态
+ros2 topic list
+ros2 topic echo /joint_states
+
+# 4. 调试 URDF
+ros2 topic echo /robot_description | head -20
+```
+
+---
+
+**准备好开始了吗？** 🚀
+
+```bash
+cd /media/dubhe/store/sim/panda/PandaRobot/ros2_ws
+./run_panda.sh
+# 或者
+ros2 launch panda_description view_panda_gui.launch.py
+```
+
+**祝你演示成功！** 🤖✨
